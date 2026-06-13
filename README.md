@@ -55,18 +55,32 @@ development. Run the socket parts for real on Linux.
 ## Quick start
 
 ```bash
-# Install the framework + extras (run on Linux for the socket parts)
-pip install -e "D:\code\xime\xime framework"
-pip install "xime[grpc]" "xime[socket]"
+# 1. Create a shared virtual environment
+python3 -m venv .venv
+source .venv/bin/activate          # Linux/macOS
+# .venv\Scripts\activate           # Windows
 
-# Start order for a demo: Trust Service -> server -> client
-cd server && python -m app.main     # serves gRPC (:50051) + socket (/tmp/xime/crypto.sock)
-cd client && python -m app.main     # runs the gRPC Vault demo + the socket Crypto Engine demo
+# 2. Install the framework + extras
+pip install "xime[grpc,socket,scheduler]"
+pip install cryptography           # Fernet encryption for cert files
+
+# 3. Install server and client in editable mode
+pip install -e "./server[test]"
+pip install -e "./client[test]"
+
+# 4. Start order for a demo: Trust Service -> server -> client
+cd server && python -m app.main    # serves gRPC (:50051) + socket (/tmp/xime/crypto.sock)
+cd client && python -m app.main    # runs the gRPC Vault demo + the socket Crypto Engine demo
 ```
 
 You need a running **Trust Service** plus the runtime secrets
-(`runtime/security/bootstrap.txt` + `ca.pem`) for the gRPC/mTLS half - see each
-app's README and `runtime/security/README.md`.
+(`runtime/security/bootstrap.txt` + `ca-cert.pem`) for the gRPC/mTLS half - see
+each app's README and `runtime/security/README.md`.
+
+> **PyPI note**: `pip install "xime[all]"` may fail if the published version
+> constrains `apscheduler>=4.0` (no stable 4.x exists yet). Use
+> `xime[grpc,socket,scheduler]` to avoid the `all` alias, or install from a local
+> clone: `pip install -e "<path-to-xime-framework>[all]"`.
 
 ## Tests
 

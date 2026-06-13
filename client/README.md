@@ -34,14 +34,23 @@ Crypto Engine** bên dưới.
 ## Chạy
 
 ```bash
-pip install -e "D:\code\xime\xime framework"
-pip install "xime[grpc]"
-pip install -e .
+# 1. Tạo venv + cài thư viện (từ root repo hoặc riêng trong client/)
+python3 -m venv .venv
+source .venv/bin/activate
 
-# Đặt secrets do Trust cấp vào runtime/security/ (bootstrap.txt + ca.pem)
-# với service_id = "vault-client" (xem resources/application.yml)
+pip install "xime[grpc,socket,scheduler]"
+pip install cryptography
+pip install -e ".[test]"
 
-# Chạy SAU khi Trust + server đã lên:
+# 2. Sinh lại SDK client nếu server đổi contract (xem mục "Khi sửa contract")
+
+# 3. Đặt secrets do Trust cấp vào runtime/security/
+#    - bootstrap.txt   (cert bootstrap lần đầu)
+#    - ca-cert.pem     (root CA của Trust)
+#    service_id = "vault-client" (xem resources/application.yml)
+#    Xem runtime/security/README.md
+
+# 4. Chạy SAU khi Trust Service + server đã lên:
 python -m app.main
 ```
 
@@ -76,10 +85,22 @@ python -m pytest tests/
 
 ## Khi sửa contract
 
-Nếu server đổi controller/DTO: chạy lại `xime grpc generate` ở server, copy
-`vault.proto` + `contract.json` mới sang `contracts/vault/`, rồi
-`xime grpc client --proto contracts/vault --out clients/vault`. SDK luôn là mã
-sinh, không sửa tay.
+Nếu server đổi controller/DTO:
+
+```bash
+# Ở server/: sinh lại proto
+python -c "from xime.cli._main import main; main()" grpc generate --config app.config
+
+# Copy contract sang client/
+cp server/generated/default/vault.proto client/contracts/vault/
+cp server/generated/default/contract.json client/contracts/vault/
+
+# Ở client/: sinh lại SDK
+python -c "from xime.cli._main import main; main()" grpc client \
+    --proto contracts/vault --out clients/vault
+```
+
+SDK (`clients/vault/`) luôn là mã sinh, không sửa tay.
 
 ## Cấu trúc
 

@@ -36,18 +36,22 @@ bootstrap, cert client viết tay) là **copy nguyên từ data-service**.
 ## Chạy
 
 ```bash
-# 1. Cài framework + extra gRPC
-pip install -e "D:\code\xime\xime framework"
-pip install "xime[grpc]"
-pip install -e .        # deps của app
+# 1. Tạo venv + cài thư viện (từ root repo hoặc riêng trong server/)
+python3 -m venv .venv
+source .venv/bin/activate
+
+pip install "xime[grpc,socket,scheduler]"
+pip install cryptography
+pip install -e ".[test]"
 
 # 2. Đặt secrets do Trust cấp vào runtime/security/
-#    - bootstrap.txt  (cert bootstrap lần đầu)
-#    - ca.pem         (root CA của Trust)
+#    - bootstrap.txt   (cert bootstrap lần đầu)
+#    - ca-cert.pem     (root CA của Trust)
 #    Xem runtime/security/README.md
 
 # 3. (tuỳ chọn) sinh lại proto sau khi sửa controller/DTO
-xime grpc generate --config app.config
+#    Lưu ý: nếu xime không trên PATH, dùng lệnh đầy đủ:
+python -c "from xime.cli._main import main; main()" grpc generate --config app.config
 
 # 4. Chạy (cần Trust Service đang chạy ở trust.grpc.host:port)
 python -m app.main

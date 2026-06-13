@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: vault-grpc-server-example
+Version: 0.1.0
+Summary: Ví dụ tham khảo: server gRPC code-first + mTLS động trên Xime Framework
+Requires-Python: >=3.11
+Requires-Dist: pydantic
+Requires-Dist: cryptography
+Requires-Dist: grpcio
+Requires-Dist: grpcio-tools
+Requires-Dist: protobuf
+Requires-Dist: apscheduler
+Requires-Dist: msgpack
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: pytest-asyncio; extra == "test"

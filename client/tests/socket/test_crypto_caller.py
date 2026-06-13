@@ -23,38 +23,16 @@ e2e = pytest.mark.skipif(
     reason="socket e2e cần Unix socket (Linux) + msgpack",
 )
 
-
-# ===========================================================================
-# 1. Unit - đọc cấu hình (chạy mọi OS)
-# ===========================================================================
-
-def test_socket_path_from_config():
-    cfg = RuntimeConfig.from_dict({"crypto_engine": {"socket_path": "/custom/x.sock"}})
-    uc = CryptoEngineCallerUseCase(cfg)
-    assert uc._socket_path == "/custom/x.sock"
-
-
-def test_socket_path_default_when_absent():
-    cfg = RuntimeConfig.from_dict({})
-    uc = CryptoEngineCallerUseCase(cfg)
-    assert uc._socket_path == "/tmp/xime/crypto.sock"
-
-
-# ===========================================================================
-# 2. E2E - chỉ Linux + msgpack
-# ===========================================================================
-
-@e2e
-@pytest.mark.asyncio
-async def test_e2e_caller_runs_against_engine(tmp_path):
+# ---------------------------------------------------------------------------
+# Stub models + engine cho e2e test - phải ở module level để
+# typing.get_type_hints() resolve được (from __future__ import annotations
+# biến annotation thành string, cần tìm được trong globals).
+# ---------------------------------------------------------------------------
+if HAS_UNIX and HAS_MSGPACK:
     from pydantic import BaseModel
 
     from xime.core.contract import DownloadStream, UploadStream, command, stream
-    from xime.adapters.socket._adapter import SocketAdapter
-    from xime.adapters.socket._config import SocketServerConfig
-    from xime.adapters.socket.routing._builder import SocketEndpointBuilder
 
-    # Engine server tối giản, độc lập với code server/ (tests client tự chứa).
     class HReq(BaseModel):
         blob_id: str
 
@@ -97,6 +75,34 @@ async def test_e2e_caller_runs_against_engine(tmp_path):
 
         def get(self, cls):
             return self._instances[cls]
+
+
+# ===========================================================================
+# 1. Unit - đọc cấu hình (chạy mọi OS)
+# ===========================================================================
+
+def test_socket_path_from_config():
+    cfg = RuntimeConfig.from_dict({"crypto_engine": {"socket_path": "/custom/x.sock"}})
+    uc = CryptoEngineCallerUseCase(cfg)
+    assert uc._socket_path == "/custom/x.sock"
+
+
+def test_socket_path_default_when_absent():
+    cfg = RuntimeConfig.from_dict({})
+    uc = CryptoEngineCallerUseCase(cfg)
+    assert uc._socket_path == "/tmp/xime/crypto.sock"
+
+
+# ===========================================================================
+# 2. E2E - chỉ Linux + msgpack
+# ===========================================================================
+
+@e2e
+@pytest.mark.asyncio
+async def test_e2e_caller_runs_against_engine(tmp_path):
+    from xime.adapters.socket._adapter import SocketAdapter
+    from xime.adapters.socket._config import SocketServerConfig
+    from xime.adapters.socket.routing._builder import SocketEndpointBuilder
 
     sock_path = str(tmp_path / "crypto.sock")
     adapter = SocketAdapter("crypto", path=sock_path)

@@ -1,0 +1,11 @@
+pydantic
+cryptography
+grpcio
+grpcio-tools
+protobuf
+apscheduler
+msgpack
+
+[test]
+pytest
+pytest-asyncio

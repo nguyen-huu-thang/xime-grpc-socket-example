@@ -3,7 +3,7 @@ __pycache__/
 # Secrets provided/produced at runtime
 runtime/
 
-
+.venv
 */application.yml
 
 van-de-framework

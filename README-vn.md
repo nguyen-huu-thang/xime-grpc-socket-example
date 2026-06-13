@@ -54,18 +54,32 @@ thật trên Linux.
 ## Bắt đầu nhanh
 
 ```bash
-# Cài framework + extra (chạy trên Linux cho phần socket)
-pip install -e "D:\code\xime\xime framework"
-pip install "xime[grpc]" "xime[socket]"
+# 1. Tạo môi trường ảo (khuyến nghị dùng chung cho cả server + client)
+python3 -m venv .venv
+source .venv/bin/activate          # Linux/macOS
+# .venv\Scripts\activate           # Windows
 
-# Thứ tự demo: Trust Service -> server -> client
-cd server && python -m app.main     # phục vụ gRPC (:50051) + socket (/tmp/xime/crypto.sock)
-cd client && python -m app.main     # chạy demo Vault gRPC + demo Crypto Engine socket
+# 2. Cài framework + extras
+pip install "xime[grpc,socket,scheduler]"
+pip install cryptography           # mã hoá cert khi lưu file
+
+# 3. Cài server và client ở chế độ editable
+pip install -e "./server[test]"
+pip install -e "./client[test]"
+
+# 4. Thứ tự demo: Trust Service -> server -> client
+cd server && python -m app.main    # phục vụ gRPC (:50051) + socket (/tmp/xime/crypto.sock)
+cd client && python -m app.main    # chạy demo Vault gRPC + demo Crypto Engine socket
 ```
 
 Nửa gRPC/mTLS cần **Trust Service đang chạy** cùng secrets runtime
-(`runtime/security/bootstrap.txt` + `ca.pem`) - xem README mỗi app và
+(`runtime/security/bootstrap.txt` + `ca-cert.pem`) - xem README mỗi app và
 `runtime/security/README.md`.
+
+> **Lưu ý PyPI**: `pip install "xime[all]"` có thể lỗi nếu bản PyPI đang dùng
+> `apscheduler>=4.0` (chưa có bản stable). Dùng `xime[grpc,socket,scheduler]`
+> để bỏ qua extra `all`, hoặc cài từ source local:
+> `pip install -e "<path-tới-xime-framework>[all]"`.
 
 ## Test
 
