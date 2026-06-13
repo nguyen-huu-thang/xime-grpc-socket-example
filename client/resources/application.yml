@@ -1,0 +1,52 @@
+# Vault gRPC Client - Runtime Configuration (operator-facing)
+# Cấu hình runtime cho client Vault (dành cho người vận hành)
+
+# Framework auto-configures root logging at bootstrap. The whole block is
+# optional - omit it and you still get INFO logs with this exact format. The
+# framework only configures when enabled: true AND the app hasn't set up logging
+# itself (a manual basicConfig/dictConfig always wins). Set enabled: false to
+# opt out entirely.
+# Framework tự cấu hình root logging lúc bootstrap. Cả khối là tùy chọn - bỏ đi
+# vẫn có log INFO với đúng format này. Chỉ áp dụng khi enabled: true VÀ app chưa
+# tự cấu hình logging (basicConfig/dictConfig tay luôn thắng). Đặt enabled: false
+# để framework không đụng tới logging.
+logging:
+  enabled: true
+  level: INFO          # DEBUG / INFO / WARNING / ERROR
+  format: "%(asctime)s | %(levelname)-7s | %(name)s | %(message)s"
+  datefmt: "%H:%M:%S"
+
+grpc:
+  # Outbound clients. "vault" matches configure_grpc_clients("vault", ...).
+  # Client ra. "vault" khớp configure_grpc_clients("vault", ...).
+  clients:
+    vault:
+      host: "localhost"      # địa chỉ server Vault
+      port: 50051            # = grpc.port của server
+      deadline_ms: 3000
+      tls:
+        enabled: true
+        dynamic: true        # channel tự rebuild khi cert rotate
+
+# App-level config for the socket "Crypto Engine" caller. There is no socket
+# client DI auto-wiring, so the use case reads this path and builds a
+# SocketClient by hand. Must match the server's socket path
+# (server socket.dir "/tmp/xime" + server_id "crypto").
+# Config app-level cho phần gọi "Crypto Engine" qua socket. Không có DI tự nối
+# client socket, nên use case đọc path này và tự dựng SocketClient. Phải trùng
+# path server bind (socket.dir "/tmp/xime" + server_id "crypto").
+crypto_engine:
+  socket_path: "/tmp/xime/crypto.sock"
+
+trust:
+  grpc:
+    host: "localhost"
+    port: 9090
+  service_id: "vault-client"
+  bootstrap:
+    path: "./runtime/security/bootstrap.txt"
+  ca_cert:
+    path: "./runtime/security/ca-cert.pem"
+  cert_store:
+    path: "./runtime/security/cert.json"
+  cert_encryption_key: "HyIm_po-6BUBLoUPpXS0jHibt-Jqp_S3XrQbKYHTF2I="

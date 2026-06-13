@@ -1,0 +1,26 @@
+[project]
+name = "vault-grpc-server-example"
+version = "0.1.0"
+description = "Ví dụ tham khảo: server gRPC code-first + mTLS động trên Xime Framework"
+requires-python = ">=3.11"
+dependencies = [
+    # Cài Xime kèm extra gRPC + socket từ local:
+    #   pip install -e "D:\\code\\xime\\xime framework"
+    # rồi: pip install "xime[grpc]" "xime[socket]"
+    "pydantic",
+    "cryptography",        # Fernet mã hoá cert khi lưu file
+    "grpcio",
+    "grpcio-tools",
+    "protobuf",
+    "apscheduler",         # scheduler starter (CertRotationJob)
+    "msgpack",             # serialize cho Socket adapter (xime[socket])
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-asyncio",
+]
+
+[tool.setuptools]
+packages = ["app"]

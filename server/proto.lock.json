@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "messages": {
+    "FetchRequest": {
+      "fields": {
+        "name": 1,
+        "parts": 2
+      },
+      "reserved_numbers": [],
+      "reserved_names": []
+    },
+    "HashRequest": {
+      "fields": {
+        "text": 1
+      },
+      "reserved_numbers": [],
+      "reserved_names": []
+    },
+    "HashResponse": {
+      "fields": {
+        "digest": 1,
+        "trace_id": 2
+      },
+      "reserved_numbers": [],
+      "reserved_names": []
+    },
+    "StoreRequest": {
+      "fields": {
+        "name": 1
+      },
+      "reserved_numbers": [],
+      "reserved_names": []
+    },
+    "StoreResponse": {
+      "fields": {
+        "name": 1,
+        "total_bytes": 2
+      },
+      "reserved_numbers": [],
+      "reserved_names": []
+    }
+  }
+}

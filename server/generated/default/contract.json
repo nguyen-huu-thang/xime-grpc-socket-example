@@ -1,0 +1,38 @@
+{
+  "field_types": {
+    "HashResponse.trace_id": "uuid"
+  },
+  "package": "xime.default",
+  "schema_version": 1,
+  "server_id": "default",
+  "services": {
+    "VaultController": {
+      "methods": {
+        "Fetch": {
+          "kind": "server_stream",
+          "name": "fetch",
+          "request": "FetchRequest",
+          "wrapper": "FetchChunk"
+        },
+        "Hash": {
+          "kind": "unary",
+          "name": "hash",
+          "request": "HashRequest",
+          "response": "HashResponse"
+        },
+        "Store": {
+          "kind": "client_stream",
+          "name": "store",
+          "request": "StoreRequest",
+          "response": "StoreResponse",
+          "wrapper": "StoreChunk"
+        }
+      },
+      "proto_file": "vault.proto"
+    }
+  },
+  "wrappers": [
+    "FetchChunk",
+    "StoreChunk"
+  ]
+}

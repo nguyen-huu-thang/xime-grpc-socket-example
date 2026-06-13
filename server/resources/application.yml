@@ -1,0 +1,61 @@
+# Vault gRPC Server - Runtime Configuration (operator-facing)
+# Cấu hình runtime cho server Vault (dành cho người vận hành)
+
+# Framework auto-configures root logging at bootstrap. The whole block is
+# optional - omit it and you still get INFO logs with this exact format. The
+# framework only configures when enabled: true AND the app hasn't set up logging
+# itself (a manual basicConfig/dictConfig always wins). Set enabled: false to
+# opt out entirely.
+# Framework tự cấu hình root logging lúc bootstrap. Cả khối là tùy chọn - bỏ đi
+# vẫn có log INFO với đúng format này. Chỉ áp dụng khi enabled: true VÀ app chưa
+# tự cấu hình logging (basicConfig/dictConfig tay luôn thắng). Đặt enabled: false
+# để framework không đụng tới logging.
+logging:
+  enabled: true
+  level: INFO          # DEBUG / INFO / WARNING / ERROR
+  format: "%(asctime)s | %(levelname)-7s | %(name)s | %(message)s"
+  datefmt: "%H:%M:%S"
+
+grpc:
+  port: 50051
+  # Dynamic mTLS: cert comes from TrustGrpcCertificateProvider (config/grpc.py),
+  # re-read on every new handshake. No static cert_file/key_file.
+  # mTLS động: cert lấy từ TrustGrpcCertificateProvider, đọc lại mỗi handshake.
+  tls:
+    enabled: true
+    mutual: true
+
+# Socket (UDS) server for the native "Crypto Engine". Linux-only transport.
+# Path is auto-derived from the controller server_id "crypto": <dir>/crypto.sock.
+# Server socket (UDS) cho "Crypto Engine" native. Transport chỉ chạy Linux.
+# Path tự suy từ server_id "crypto" của controller: <dir>/crypto.sock.
+socket:
+  dir: /tmp/xime          # tránh /run/xime cần quyền root khi dev
+  permission: "0600"      # chmod file .sock sau khi bind
+  session_timeout: 30     # giây; session idle quá ngưỡng bị dọn
+  # allowed_uids: [1000]  # tuỳ chọn: whitelist SO_PEERCRED ([] = mọi UID)
+
+trust:
+  # Trust Service gRPC endpoint (for bootstrap + cert rotation).
+  # Endpoint gRPC của Trust Service (cho bootstrap + rotate cert).
+  grpc:
+    host: "localhost"
+    port: 9090
+  service_id: "vault-server"
+  # Bootstrap file - initial cert, deleted after first rotate.
+  # File bootstrap - cert ban đầu, xoá sau lần rotate đầu.
+  bootstrap:
+    path: "./runtime/security/bootstrap.txt"
+  # Root CA PEM - used to verify the Trust Service / peer in mTLS.
+  # Root CA PEM - dùng verify Trust Service / phía bên kia trong mTLS.
+  ca_cert:
+    path: "./runtime/security/ca-cert.pem"
+  # File-backed cert store path (file-based persistence, no database).
+  # Đường dẫn store cert dạng file (persistence file, không DB).
+  cert_store:
+    path: "./runtime/security/cert.json"
+  # Fernet key encrypting private_key + refresh_token at rest. Must stay stable
+  # across restarts. Override via env TRUST_CERT_ENCRYPTION_KEY.
+  # Khoá Fernet mã hoá private_key + refresh_token khi lưu. Phải ổn định giữa các
+  # lần chạy. Override qua env TRUST_CERT_ENCRYPTION_KEY.
+  cert_encryption_key: "HyIm_po-6BUBLoUPpXS0jHibt-Jqp_S3XrQbKYHTF2I="

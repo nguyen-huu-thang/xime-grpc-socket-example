@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package trust.external.trust;
+
+option java_package = "vn.xime.trust.grpc.external.trust";
+option java_multiple_files = true;
+
+// ==================================================
+// TRUST SERVICE (ROOT OF TRUST)
+// ==================================================
+//
+// 👉 dùng để:
+// - lấy Root CA certificate
+//
+// USE CASE:
+// - bootstrap trust store
+// - verify mTLS certificate
+//
+// NOTE:
+// - response gần như không đổi → có thể cache
+//
+service TrustService {
+
+  // ==================================================
+  // GET ROOT CA CERTIFICATE
+  // ==================================================
+  //
+  // 👉 trả về:
+  // - Root CA (PEM)
+  //
+  // 👉 dùng khi:
+  // - service start
+  // - refresh trust store (optional)
+  //
+  rpc GetRootCertificate (GetRootCertificateRequest)
+      returns (GetRootCertificateResponse);
+}
+
+
+message GetRootCertificateRequest {
+  // intentionally empty
+}
+
+
+message GetRootCertificateResponse {
+
+  // PEM format
+  string root_cert = 1;
+
+  // optional (future-proof)
+  string fingerprint = 2;
+
+  // optional (epoch millis)
+  int64 expires_at = 3;
+}

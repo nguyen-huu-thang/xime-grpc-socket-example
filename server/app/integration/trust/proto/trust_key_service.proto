@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package trust.v1;
+
+// Key distribution service — Data Service calls this to fetch public keys
+// for verifying JWTs signed by Identity Service.
+service KeyDistributionService {
+  rpc GetVerificationKeys (GetVerificationKeysRequest) returns (GetVerificationKeysResponse);
+}
+
+message GetVerificationKeysRequest {
+  string signer_service_id   = 1;  // e.g. "identity"
+  string verifier_service_id = 2;  // e.g. "data"
+}
+
+message GetVerificationKeysResponse {
+  repeated VerificationKey keys = 1;
+}
+
+message VerificationKey {
+  string key_id           = 1;
+  string public_key       = 2;  // PEM-encoded public key
+  string algorithm        = 3;  // RS256, ES256, EdDSA
+  int64  activate_at_unix = 4;  // Unix timestamp — key valid for signing from this point
+  int64  expires_at_unix  = 5;  // Unix timestamp — key valid for verifying until this point
+  bool   is_deleted       = 6;
+}

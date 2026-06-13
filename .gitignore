@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+# Secrets provided/produced at runtime
+runtime/
+
+
+*/application.yml
+
+van-de-framework
