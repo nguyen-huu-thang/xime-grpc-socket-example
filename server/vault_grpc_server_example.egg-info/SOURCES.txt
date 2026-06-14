@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-app/__init__.py
-app/main.py
-vault_grpc_server_example.egg-info/PKG-INFO
-vault_grpc_server_example.egg-info/SOURCES.txt
-vault_grpc_server_example.egg-info/dependency_links.txt
-vault_grpc_server_example.egg-info/requires.txt
-vault_grpc_server_example.egg-info/top_level.txt

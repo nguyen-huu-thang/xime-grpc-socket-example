@@ -29,7 +29,6 @@ once, serve it over different transports.
 | [`server/`](server/) | Xime app: gRPC code-first (Vault) **and** Socket (Crypto Engine) |
 | [`client/`](client/) | Xime app: calls Vault via generated SDK + DI, and the Crypto Engine via `SocketClient` |
 | [`.claude/docs/`](.claude/docs/) | Architecture + step-by-step build plans (gRPC and socket) |
-| [`van-de-framework/`](van-de-framework/) | Framework issues found while building this example |
 
 Each folder under `server/`/`client/` is a complete, independently-runnable Xime
 app (`main.py`, `config/`, `resources/application.yml`, `integration/trust/`).
@@ -68,14 +67,23 @@ pip install cryptography           # Fernet encryption for cert files
 pip install -e "./server[test]"
 pip install -e "./client[test]"
 
-# 4. Start order for a demo: Trust Service -> server -> client
+# 4. Generate dev certificates so mTLS works WITHOUT a Trust Service
+python tools/generate_dev_certs.py
+
+# 5. Run (two terminals)
 cd server && python -m app.main    # serves gRPC (:50051) + socket (/tmp/xime/crypto.sock)
 cd client && python -m app.main    # runs the gRPC Vault demo + the socket Crypto Engine demo
 ```
 
-You need a running **Trust Service** plus the runtime secrets
-(`runtime/security/bootstrap.txt` + `ca-cert.pem`) for the gRPC/mTLS half - see
-each app's README and `runtime/security/README.md`.
+**No Trust Service needed to run the example.** mTLS has two phases: a one-time
+**bootstrap** (exchange a token with a Trust Service for a real cert) and the
+**runtime** phase (every later start just loads the cert from
+`runtime/security/cert.json` and never calls Trust in real time, only re-contacting
+it if the cert nears expiry and must rotate). `tools/generate_dev_certs.py` writes a
+valid dev CA + cert straight into the runtime phase, so both apps start and do mTLS
+on their own. To see the real bootstrap/rotation flow against a Trust Service, study
+<https://github.com/nguyen-huu-thang/trust-service> (or each app's
+`runtime/security/README.md`).
 
 > **PyPI note**: `pip install "xime[all]"` may fail if the published version
 > constrains `apscheduler>=4.0` (no stable 4.x exists yet). Use
@@ -90,7 +98,8 @@ cd client && pip install -e ".[test]" && python -m pytest tests/
 ```
 
 Unit tests run on any OS; socket end-to-end tests auto-skip on Windows and run on
-Linux. The `tests/grpc/` folders are intentionally empty (gRPC is verified live).
+Linux. `server/tests/grpc/` holds VaultUseCase unit tests; the full gRPC wiring
+(code-first + dynamic mTLS) is verified live.
 
 ## Read next
 

@@ -49,4 +49,9 @@ trust:
     path: "./runtime/security/ca-cert.pem"
   cert_store:
     path: "./runtime/security/cert.json"
+  # Fernet key encrypting private_key + refresh_token at rest. Must match the value
+  # used to write cert.json. DEMO KEY ONLY - generate your own for any real use:
+  # python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+  # Khoá Fernet mã hoá private_key + refresh_token. Phải khớp khoá đã ghi cert.json.
+  # KHOÁ DEMO - dùng thật phải tự sinh khoá mới.
   cert_encryption_key: "HyIm_po-6BUBLoUPpXS0jHibt-Jqp_S3XrQbKYHTF2I="

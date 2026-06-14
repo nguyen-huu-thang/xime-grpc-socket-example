@@ -2,7 +2,7 @@
 name = "vault-grpc-client-example"
 version = "0.1.0"
 description = "Ví dụ tham khảo: client gRPC SDK + DI + mTLS động trên Xime Framework"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     # Cài Xime kèm extra gRPC + socket từ local:
     #   pip install -e "D:\\code\\xime\\xime framework"

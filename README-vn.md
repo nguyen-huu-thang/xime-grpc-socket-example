@@ -28,7 +28,6 @@ phục vụ qua nhiều transport.
 | [`server/`](server/) | App Xime: gRPC code-first (Vault) **và** Socket (Crypto Engine) |
 | [`client/`](client/) | App Xime: gọi Vault qua SDK sinh tự động + DI, và Crypto Engine qua `SocketClient` |
 | [`.claude/docs/`](.claude/docs/) | Kiến trúc + kế hoạch xây dựng từng bước (gRPC và socket) |
-| [`van-de-framework/`](van-de-framework/) | Các vấn đề của framework phát hiện khi làm ví dụ này |
 
 Mỗi thư mục `server/`/`client/` là một app Xime hoàn chỉnh, chạy riêng (`main.py`,
 `config/`, `resources/application.yml`, `integration/trust/`).
@@ -67,14 +66,22 @@ pip install cryptography           # mã hoá cert khi lưu file
 pip install -e "./server[test]"
 pip install -e "./client[test]"
 
-# 4. Thứ tự demo: Trust Service -> server -> client
+# 4. Sinh cert dev để mTLS chạy được mà KHÔNG cần Trust Service
+python tools/generate_dev_certs.py
+
+# 5. Chạy (hai terminal)
 cd server && python -m app.main    # phục vụ gRPC (:50051) + socket (/tmp/xime/crypto.sock)
 cd client && python -m app.main    # chạy demo Vault gRPC + demo Crypto Engine socket
 ```
 
-Nửa gRPC/mTLS cần **Trust Service đang chạy** cùng secrets runtime
-(`runtime/security/bootstrap.txt` + `ca-cert.pem`) - xem README mỗi app và
-`runtime/security/README.md`.
+**Không cần Trust Service để chạy ví dụ.** mTLS có 2 giai đoạn: **bootstrap** một
+lần (đổi token lấy cert thật qua Trust Service) và giai đoạn **runtime** (các lần
+chạy sau chỉ LOAD cert từ `runtime/security/cert.json`, không gọi Trust realtime,
+chỉ liên hệ lại khi cert sắp hết hạn và cần rotate). `tools/generate_dev_certs.py`
+ghi sẵn CA + cert dev vào giai đoạn runtime nên cả hai app tự khởi động và mTLS với
+nhau. Muốn xem luồng bootstrap/rotate thật với Trust Service, nghiên cứu
+<https://github.com/nguyen-huu-thang/trust-service> (hoặc `runtime/security/README.md`
+của mỗi app).
 
 > **Lưu ý PyPI**: `pip install "xime[all]"` có thể lỗi nếu bản PyPI đang dùng
 > `apscheduler>=4.0` (chưa có bản stable). Dùng `xime[grpc,socket,scheduler]`
@@ -88,8 +95,9 @@ cd server && pip install -e ".[test]" && python -m pytest tests/
 cd client && pip install -e ".[test]" && python -m pytest tests/
 ```
 
-Unit test chạy mọi OS; e2e socket tự skip trên Windows, chạy trên Linux. Thư mục
-`tests/grpc/` cố ý để trống (gRPC đã verify chạy live).
+Unit test chạy mọi OS; e2e socket tự skip trên Windows, chạy trên Linux.
+`server/tests/grpc/` có unit test cho VaultUseCase; phần dây gRPC đầy đủ (code-first
++ mTLS động) đã verify chạy live.
 
 ## Đọc tiếp
 

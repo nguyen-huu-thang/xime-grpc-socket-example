@@ -9,7 +9,7 @@ class RootCertificateFileStore:
     """Reads the Root CA certificate from a PEM file on disk."""
 
     def __init__(self, config: RuntimeConfig) -> None:
-        self._path = Path(config.get("trust.ca_cert.path", "./runtime/security/ca.pem"))
+        self._path = Path(config.get("trust.ca_cert.path", "./runtime/security/ca-cert.pem"))
 
     def load(self) -> RootCertificate:
         if not self._path.exists():

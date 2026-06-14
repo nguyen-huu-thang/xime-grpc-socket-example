@@ -3,6 +3,11 @@
 1. Unit (mọi OS): CryptoEngineCallerUseCase đọc đúng socket_path từ config.
 2. E2E (chỉ Linux + msgpack): dựng một socket server engine tối giản trong tiến
    trình, chạy run_demo() của use case end-to-end (smoke: hoàn tất không lỗi).
+
+LƯU Ý: phần e2e thò vào nội bộ framework (xime.adapters.socket._adapter / _config /
+routing._builder) để dựng server thủ công trong tiến trình test. Đây là SCAFFOLDING
+CHỈ DÙNG CHO TEST - app thật chỉ cần API công khai (SocketClient), không đụng tới
+các module gạch dưới.
 """
 from __future__ import annotations
 

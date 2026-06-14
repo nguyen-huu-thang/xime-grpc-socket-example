@@ -16,7 +16,7 @@ cùng lúc**. Xem mục **Socket: Crypto Engine** bên dưới.
 
 - **Code-first 3 kiểu RPC** trong [app/api/grpc/VaultController.py](app/api/grpc/VaultController.py):
   - `hash` - `@command` (unary): `HashRequest{text}` -> `HashResponse{digest, trace_id: UUID}`
-  - `store` - `@stream` + `UploadStream` (client-stream): nhận chunk -> `StoreResponse{total_bytes}`
+  - `store` - `@stream` + `UploadStream` (client-stream): nhận chunk -> `StoreResponse{name, total_bytes}`
   - `fetch` - `@stream` + `DownloadStream` (server-stream): phát các chunk
   - DTO ở [app/application/dto/vault.py](app/application/dto/vault.py) là nguồn chân lý; `trace_id: uuid.UUID` minh hoạ sidecar giữ kiểu 1:1.
 - **Sinh mã**: `xime grpc generate` -> [generated/vault/](generated/vault/) (`.proto`, `contract.json`, `_descriptors.binpb`, `*_pb2*`).
@@ -44,21 +44,21 @@ pip install "xime[grpc,socket,scheduler]"
 pip install cryptography
 pip install -e ".[test]"
 
-# 2. Đặt secrets do Trust cấp vào runtime/security/
-#    - bootstrap.txt   (cert bootstrap lần đầu)
-#    - ca-cert.pem     (root CA của Trust)
-#    Xem runtime/security/README.md
+# 2. Sinh cert dev vào runtime/security/ - KHÔNG cần Trust Service
+#    Tạo cert.json + ca-cert.pem cho cả server lẫn client. Xem runtime/security/README.md.
+python ../tools/generate_dev_certs.py
 
 # 3. (tuỳ chọn) sinh lại proto sau khi sửa controller/DTO
 #    Lưu ý: nếu xime không trên PATH, dùng lệnh đầy đủ:
 python -c "from xime.cli._main import main; main()" grpc generate --config app.config
 
-# 4. Chạy (cần Trust Service đang chạy ở trust.grpc.host:port)
+# 4. Chạy (cert đã có sẵn ở bước 2; không cần Trust Service)
 python -m app.main
 ```
 
 Server lắng nghe gRPC ở cổng `50051` (xem `resources/application.yml`), mTLS bật.
-Thứ tự demo: Trust Service -> server (app này) -> client.
+Thứ tự demo: server (app này) -> client. Trust Service chỉ cần nếu bạn chạy luồng
+bootstrap thật (xem `runtime/security/README.md`).
 
 ## Socket: Crypto Engine (UDS, chỉ Linux)
 
@@ -87,7 +87,7 @@ python -m pytest tests/
 ```
 
 - `tests/socket/` - unit (use case + builder + DTO, chạy mọi OS) + e2e (chỉ Linux).
-- `tests/grpc/` - để trống (gRPC đã verify chạy live).
+- `tests/grpc/` - unit test VaultUseCase (chạy mọi OS); dây gRPC đầy đủ verify chạy live.
 - Trên Windows: unit pass, e2e tự skip. Trên Linux: e2e chạy đầy đủ.
 
 ## Cấu trúc
@@ -112,9 +112,9 @@ app/
   main.py                         # GrpcAdapter() + SocketAdapter("crypto") (guard nền tảng)
 generated/vault/                  # mã sinh gRPC (commit để client copy proto)
 tests/
-  grpc/                           # để trống (gRPC đã verify chạy live)
+  grpc/test_vault_usecase.py      # unit VaultUseCase (mọi OS)
   socket/test_crypto_engine.py    # unit (mọi OS) + e2e (Linux)
 conftest.py                       # cho phép import app khi chạy pytest
 resources/application.yml         # cổng gRPC, khối socket:, trust.*, cert_encryption_key
-runtime/security/                 # bootstrap.txt + ca.pem (bạn cấp), cert.json (sinh ra)
+runtime/security/                 # cert.json + ca-cert.pem (sinh bởi tools/generate_dev_certs.py)
 ```

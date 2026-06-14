@@ -56,6 +56,9 @@ trust:
     path: "./runtime/security/cert.json"
   # Fernet key encrypting private_key + refresh_token at rest. Must stay stable
   # across restarts. Override via env TRUST_CERT_ENCRYPTION_KEY.
+  # DEMO KEY ONLY - committed so the example runs out of the box. Generate your own
+  # for any real use: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
   # Khoá Fernet mã hoá private_key + refresh_token khi lưu. Phải ổn định giữa các
   # lần chạy. Override qua env TRUST_CERT_ENCRYPTION_KEY.
+  # KHOÁ DEMO - commit sẵn để ví dụ chạy ngay; dùng thật phải tự sinh khoá mới.
   cert_encryption_key: "HyIm_po-6BUBLoUPpXS0jHibt-Jqp_S3XrQbKYHTF2I="

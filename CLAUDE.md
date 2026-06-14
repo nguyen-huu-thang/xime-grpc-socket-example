@@ -38,7 +38,7 @@ một Trust Service đang chạy.
 > Persistence cert dùng **file** (không DB) - xem README mỗi app. Cụm trust copy
 > từ data-service, **chỉ phần cert/mTLS** (bỏ cụm verification-key JWT cho gọn).
 > Kế hoạch/thiết kế gốc trong `.claude/docs/`; vấn đề framework gặp phải ghi ở
-> `van-de-framework/`.
+> `van-de-framework/` (ghi chú NỘI BỘ, đã gitignore - không có khi clone bản công khai).
 
 ## Đọc trước khi bắt đầu (theo thứ tự)
 
@@ -80,10 +80,15 @@ injection, không annotation DI, interface là `Protocol`, bind tường minh tr
 
 ## Chạy ứng dụng (sau khi đã code)
 
-Cần **Trust Service đang chạy** và **file bootstrap** (người dùng cấp, đặt ở
-`runtime/security/bootstrap.txt` của mỗi app - giống data-service).
+**Không cần Trust Service để chạy ví dụ.** mTLS có 2 giai đoạn: bootstrap (một lần,
+đổi token lấy cert qua Trust) và runtime (các lần sau chỉ load cert từ
+`runtime/security/cert.json`, không gọi Trust realtime). Sinh sẵn cert dev cho cả
+hai app rồi chạy:
 
 ```bash
+# 0. Sinh cert dev (CA + cert server/client) vào runtime/security/ - chạy từ root repo
+python tools/generate_dev_certs.py
+
 # Mỗi app chạy độc lập (ưu tiên hai terminal)
 cd server && python -m app.main     # gRPC (mTLS, code-first) + Socket (Linux)
 cd client && python -m app.main     # gọi server qua SDK gRPC + SocketClient
@@ -94,7 +99,9 @@ cd server && python -c "from xime.cli._main import main; main()" grpc generate -
 cd client && python -c "from xime.cli._main import main; main()" grpc client --proto contracts/vault --out clients/vault
 ```
 
-Thứ tự khởi động khi demo: Trust Service → server → client.
+Thứ tự khởi động khi demo: server → client (cert sinh sẵn ở bước 0). Muốn chạy
+luồng bootstrap thật thì cần Trust Service (xem `runtime/security/README.md` và
+<https://github.com/nguyen-huu-thang/trust-service>).
 
 **Socket (UDS) chỉ chạy Linux/macOS.** Trên Windows phần socket tự bỏ qua (đã
 guard), chỉ gRPC chạy. Trước khi chạy thật trên Linux: `pip install "xime[socket]"`

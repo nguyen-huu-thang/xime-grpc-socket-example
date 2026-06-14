@@ -7,6 +7,11 @@ Hai nhóm:
    gọi qua SocketClient. Tự skip khi thiếu start_unix_server (Windows) hoặc msgpack.
 
 Bám mẫu: xime framework/tests_temp/socket/test_socket.py
+
+LƯU Ý: phần e2e thò vào nội bộ framework (xime.adapters.socket._adapter / _config /
+_session / routing._builder) để dựng server thủ công trong tiến trình test. Đây là
+SCAFFOLDING CHỈ DÙNG CHO TEST - app thật chỉ cần API công khai (SocketAdapter,
+SocketClient, configure_socket_controllers), không đụng tới các module gạch dưới.
 """
 from __future__ import annotations
 

@@ -44,20 +44,20 @@ pip install -e ".[test]"
 
 # 2. Sinh lại SDK client nếu server đổi contract (xem mục "Khi sửa contract")
 
-# 3. Đặt secrets do Trust cấp vào runtime/security/
-#    - bootstrap.txt   (cert bootstrap lần đầu)
-#    - ca-cert.pem     (root CA của Trust)
-#    service_id = "vault-client" (xem resources/application.yml)
-#    Xem runtime/security/README.md
+# 3. Sinh cert dev vào runtime/security/ - KHÔNG cần Trust Service
+#    Tạo cert.json + ca-cert.pem cho cả server lẫn client (service_id = "vault-client").
+#    Xem runtime/security/README.md.
+python ../tools/generate_dev_certs.py
 
-# 4. Chạy SAU khi Trust Service + server đã lên:
+# 4. Chạy SAU khi server đã lên:
 python -m app.main
 ```
 
-Client bootstrap cert -> mở channel mTLS động tới server (`localhost:50051`) ->
+Client load cert từ file -> mở channel mTLS động tới server (`localhost:50051`) ->
 gọi 3 RPC -> in kết quả -> đứng chờ (Ctrl+C để thoát).
 
-Thứ tự demo: Trust Service -> server -> client (app này).
+Thứ tự demo: server -> client (app này). Trust Service chỉ cần nếu chạy luồng
+bootstrap thật (xem `runtime/security/README.md`).
 
 ## Socket: gọi Crypto Engine (UDS, chỉ Linux)
 
@@ -125,5 +125,5 @@ tests/
   socket/test_crypto_caller.py      # unit (mọi OS) + e2e smoke (Linux)
 conftest.py                         # cho phép import app khi chạy pytest
 resources/application.yml           # grpc.clients.vault, crypto_engine.socket_path, trust.*
-runtime/security/                   # bootstrap.txt + ca.pem (bạn cấp)
+runtime/security/                   # cert.json + ca-cert.pem (sinh bởi tools/generate_dev_certs.py)
 ```
